@@ -17,6 +17,20 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.22.9' # 指定你的Go版本
+      env:
+        CGO_ENABLED: "1"  # 关键修复：启用 CGO  
+
+    - name: 安装Go Module
+      run: |
+          # 强制初始化模块（如果项目未 go mod init）
+          go mod init myapp 2>/dev/null || true
+          go mod tidy  # 同步依赖到 go.mod/go.sum
+          go mod download  # 预下载所有依赖 
+        
+    - name: Install GLFW dependencies
+      run: |
+        # 安装 macOS 系统级 OpenGL 开发包
+        brew install pkg-config glfw     
 
     - name: 安装Fyne工具链
       run: |
@@ -24,9 +38,12 @@ jobs:
         echo "$(go env GOPATH)/bin" >> $GITHUB_PATH  # 更安全的 PATH 配置方式
 
     - name: 编译并打包
+      env:
+        CGO_CFLAGS:  "-I$(brew --prefix glfw)/include"  # 指定 GLFW 头文件路径
+        CGO_LDFLAGS: "-L$(brew --prefix glfw)/lib -lglfw"  # 链接 GLFW 库
       run: |
         # 编译二进制（可选步骤）
-        GOOS=darwin GOARCH=amd64 go build -o myapp-macos
+        GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o myapp-macos -tags fyne_gui
         
         # 直接打包.app
         fyne package -os darwin -name "gowebapp" -icon assets/icon.png
