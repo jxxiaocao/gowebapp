@@ -26,7 +26,6 @@ jobs:
     - name: 编译并打包
       run: |
         # 编译二进制（可选步骤）
-        # go build -o gowebapp
         GOOS=darwin GOARCH=amd64 go build -o myapp-macos
         
         # 直接打包.app
