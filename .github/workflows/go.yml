@@ -24,15 +24,11 @@ jobs:
       run: |
           # 强制初始化模块（如果项目未 go mod init）
           go mod init myapp 2>/dev/null || true
-          go mod tidy  # 同步依赖到 go.mod/go.sum
+          go mod tidy -v # 同步依赖到 go.mod/go.sum
           go mod download  # 预下载所有依赖 
         
     - name: Install GLFW dependencies
-      run: |
-       # 静默安装（-q 参数抑制输出）
-        brew install -q pkg-config
-        # 安装 macOS 系统级 OpenGL 开发包
-        brew install pkg-config glfw || true  # 防止已安装时报错中断      
+      run: |    
         # 获取绝对路径并导出变量
         echo "GLFW_PREFIX=$(brew --prefix glfw)" >> $GITHUB_ENV
 
@@ -42,9 +38,6 @@ jobs:
         echo "$(go env GOPATH)/bin" >> $GITHUB_PATH  # 更安全的 PATH 配置方式
 
     - name: 编译并打包
-      env:
-        CGO_CFLAGS:  "-I${{ env.GLFW_PREFIX }}/include"  # 指定 GLFW 头文件路径
-        CGO_LDFLAGS: "-L${{ env.GLFW_PREFIX }}/lib -lglfw"  # 链接 GLFW 库
       run: |
         # 验证路径是否正确
         echo "GLFW Include Path: ${{ env.GLFW_PREFIX }}/include"
