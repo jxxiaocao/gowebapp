@@ -7,12 +7,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	webview_go "github.com/webview/webview_go" // 注意这里改为webview_go
 	"log"
-	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strconv"
-	"strings"
-	"syscall"
 )
 
 func main() {
@@ -91,73 +87,73 @@ const (
 )
 
 // Windows实现
-func getWindowsResolution() (int, int, error) {
-	user32 := syscall.NewLazyDLL("user32.dll")
-	getSystemMetrics := user32.NewProc("GetSystemMetrics")
-
-	cx, _, _ := getSystemMetrics.Call(SM_CXSCREEN)
-	if cx == 0 {
-		return 0, 0, fmt.Errorf("无法获取水平分辨率")
-	}
-
-	cy, _, _ := getSystemMetrics.Call(SM_CYSCREEN)
-	if cy == 0 {
-		return 0, 0, fmt.Errorf("无法获取垂直分辨率")
-	}
-
-	return int(cx), int(cy), nil
-}
+//func getWindowsResolution() (int, int, error) {
+//	user32 := syscall.NewLazyDLL("user32.dll")
+//	getSystemMetrics := user32.NewProc("GetSystemMetrics")
+//
+//	cx, _, _ := getSystemMetrics.Call(SM_CXSCREEN)
+//	if cx == 0 {
+//		return 0, 0, fmt.Errorf("无法获取水平分辨率")
+//	}
+//
+//	cy, _, _ := getSystemMetrics.Call(SM_CYSCREEN)
+//	if cy == 0 {
+//		return 0, 0, fmt.Errorf("无法获取垂直分辨率")
+//	}
+//
+//	return int(cx), int(cy), nil
+//}
 
 // macOS实现
-func getMacResolution() (int, int, error) {
-	cmd := exec.Command("system_profiler", "SPDisplaysDataType")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return 0, 0, err
-	}
-
-	lines := strings.Split(string(output), "\n")
-	for _, line := range lines {
-		if strings.Contains(line, "Resolution:") {
-			parts := strings.Split(line, ":")
-			if len(parts) < 2 {
-				continue
-			}
-
-			res := strings.TrimSpace(parts[1])
-			res = strings.ReplaceAll(res, " ", "")
-			res = strings.ReplaceAll(res, "Retina", "")
-			res = strings.TrimSpace(res)
-
-			if dims := strings.Split(res, "x"); len(dims) == 2 {
-				width, _ := strconv.Atoi(dims[0])
-				height, _ := strconv.Atoi(dims[1])
-				return width, height, nil
-			}
-		}
-	}
-
-	return 0, 0, fmt.Errorf("未找到分辨率信息")
-}
+//func getMacResolution() (int, int, error) {
+//	cmd := exec.Command("system_profiler", "SPDisplaysDataType")
+//	output, err := cmd.CombinedOutput()
+//	if err != nil {
+//		return 0, 0, err
+//	}
+//
+//	lines := strings.Split(string(output), "\n")
+//	for _, line := range lines {
+//		if strings.Contains(line, "Resolution:") {
+//			parts := strings.Split(line, ":")
+//			if len(parts) < 2 {
+//				continue
+//			}
+//
+//			res := strings.TrimSpace(parts[1])
+//			res = strings.ReplaceAll(res, " ", "")
+//			res = strings.ReplaceAll(res, "Retina", "")
+//			res = strings.TrimSpace(res)
+//
+//			if dims := strings.Split(res, "x"); len(dims) == 2 {
+//				width, _ := strconv.Atoi(dims[0])
+//				height, _ := strconv.Atoi(dims[1])
+//				return width, height, nil
+//			}
+//		}
+//	}
+//
+//	return 0, 0, fmt.Errorf("未找到分辨率信息")
+//}
 
 func initWindow(window fyne.Window, wv webview_go.WebView) {
 	// 获取主显示器尺寸（新API方式）
 	width := 1024
 	height := 768
 	// 平台适配逻辑
-	if runtime.GOOS == "windows" {
-		widths, heights, err := getWindowsResolution()
-		if err == nil {
-			width = widths
-			height = heights
-		}
-	} else if runtime.GOOS == "darwin" {
-		widths, heights, err := getMacResolution()
-		if err == nil {
-			width = widths
-			height = heights
-		}
-	}
+	//if runtime.GOOS == "windows" {
+	//	widths, heights, err := getWindowsResolution()
+	//	if err == nil {
+	//		width = widths
+	//		height = heights
+	//	}
+	//} else if runtime.GOOS == "darwin" {
+	//	widths, heights, err := getMacResolution()
+	//	if err == nil {
+	//		width = widths
+	//		height = heights
+	//	}
+	//}
 	fmt.Printf("Screen resolution: %dx%d\n", width, height)
 	window.Resize(fyne.NewSize(1920, 1080-30)) // 任务栏补偿
 	// 动态调整WebView尺寸（新版事件监听）
