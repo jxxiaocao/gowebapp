@@ -1,0 +1,39 @@
+name: Build macOS App
+
+on:
+  push:
+    branches: [ "main" ] # 触发条件：main分支推送时自动编译
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    runs-on: macos-latest # 必须使用macOS运行器
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置Go环境
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20' # 指定你的Go版本
+
+    - name: 安装Fyne工具链
+      run: |
+        go install fyne.io/fyne/v2/cmd/fyne@latest
+
+    - name: 编译并打包
+      run: |
+        # 编译二进制（可选步骤）
+        go build -o myapp
+        
+        # 直接打包.app
+        fyne package -os darwin -name "MyApp" -icon assets/icon.png -appID com.example.myapp
+
+    - name: 上传制品
+      uses: actions/upload-artifact@v3
+      with:
+        name: MyApp-MacOS
+        path: |
+          MyApp.app
+          myapp
