@@ -21,19 +21,21 @@ jobs:
     - name: 安装Fyne工具链
       run: |
         go install fyne.io/fyne/v2/cmd/fyne@latest
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH  # 更安全的 PATH 配置方式
 
     - name: 编译并打包
       run: |
         # 编译二进制（可选步骤）
-        go build -o gowebapp
+        # go build -o gowebapp
+        GOOS=darwin GOARCH=amd64 go build -o myapp-macos
         
         # 直接打包.app
-        fyne package -os darwin -name "gowebapp" -icon assets/icon.png -appID com.example.myapp
+        fyne package -os darwin -name "gowebapp" -icon assets/icon.png
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: MyApp-MacOS
         path: |
           MyApp.app
-          myapp
+          myapp-macos
