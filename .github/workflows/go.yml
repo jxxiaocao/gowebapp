@@ -25,7 +25,7 @@ jobs:
           # 强制初始化模块（如果项目未 go mod init）
           go mod init myapp 2>/dev/null || true
           go mod tidy -v # 同步依赖到 go.mod/go.sum
-          go mod download  # 预下载所有依赖 
+          # go mod download  # 预下载所有依赖 
         
     - name: Install GLFW dependencies
       run: |    
@@ -40,12 +40,12 @@ jobs:
     - name: 编译并打包
       run: |
         # 验证路径是否正确
-        echo "GLFW Include Path: ${{ env.GLFW_PREFIX }}/include"
-        echo "GLFW Library Path: ${{ env.GLFW_PREFIX }}/lib"
+        # echo "GLFW Include Path: ${{ env.GLFW_PREFIX }}/include"
+        # echo "GLFW Library Path: ${{ env.GLFW_PREFIX }}/lib"
         # 显式指定目标架构（兼容 Apple Silicon）
-        export GOARCH=amd64  # 或 arm64
+        # export GOARCH=amd64  # 或 arm64
         # 构建命令
-        go build -v -tags fyne_gui -ldflags="-w -s" -o myapp
+        # go build -v -tags fyne_gui -ldflags="-w -s" -o myapp
         fyne package -os darwin -name "MyApp" -icon assets/icon.png
 
     - name: Upload Artifact
